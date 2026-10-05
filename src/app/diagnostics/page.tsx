@@ -20,7 +20,7 @@ interface DiagnosticItem {
   whoUrl?: string;
 }
 
-export default function DiagnosticSearchPage() {
+function DiagnosticSearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const patientId = searchParams.get('patientId'); // opcional, se pasa como query string
@@ -163,5 +163,15 @@ export default function DiagnosticSearchPage() {
         )}
       </div>
     </div>
+  );
+}
+
+import { Suspense } from 'react';
+
+export default function DiagnosticSearchPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500">Cargando buscador...</div>}>
+      <DiagnosticSearchContent />
+    </Suspense>
   );
 }
