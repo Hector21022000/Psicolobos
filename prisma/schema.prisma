@@ -1,0 +1,571 @@
+// Nombre del archivo: prisma/schema.prisma
+// Descripción: Esquema relacional extendido de la base de datos de Psicolobos con soporte para Identidad Documental, Registro Clínico de Sesión en Citas, Integraciones de Sincronización (Google Calendar, WhatsApp), Evaluaciones con Flujo de Aprobación en 2 Paneles e Indexación Clínico-Diagnóstica CIE-11 / DSM-5-TR.
+// Fecha de última modificación: 2026-09-18
+// Autor: Psicolobos Development Team
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  PSYCHOLOGIST
+  ASSISTANT
+}
+
+enum PatientStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum SessionModality {
+  PRESENCIAL
+  VIRTUAL
+  TELEFONICA
+  OTRA
+}
+
+enum SessionStatus {
+  SCHEDULED
+  PENDING_CONFIRMATION
+  CONFIRMED
+  RESCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED_PATIENT
+  CANCELLED_PROFESSIONAL
+  NO_SHOW
+}
+
+enum DocumentCategory {
+  IDENTITY
+  CONSENT
+  EVALUATION
+  TEST
+  EXTERNAL_REPORT
+  RECIPE
+  ADMINISTRATIVE
+  OTHER
+}
+
+enum DiagnosisSystem {
+  CIE_11
+  DSM_5_TR
+}
+
+enum DiagnosisStatus {
+  HYPOTHESIS
+  IN_EVALUATION
+  CONFIRMED
+  DISCARDED
+  HISTORICAL
+}
+
+enum ReportType {
+  CLINICAL_SUMMARY
+  EVALUATION_REPORT
+  EVOLUTION_REPORT
+  DISCHARGE_REPORT
+  CUSTOM
+}
+
+enum ReportStatus {
+  DRAFT
+  APPROVED
+  FINALIZED
+}
+
+model User {
+  id                   String            @id @default(uuid())
+  email                String            @unique
+  passwordHash         String
+  role                 Role              @default(PSYCHOLOGIST)
+  firstName            String
+  lastName             String
+  colegiatura          String?
+  specialty            String?
+  phone                String?
+  address              String?
+  avatarUrl            String?
+  logoUrl              String?
+  digitalSignatureUrl String?
+  isActive             Boolean           @default(true)
+  scheduleJson         String?           // JSON con la disponibilidad semanal
+  webProfileJson       String?           // JSON con la información pública de su web
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  patients             Patient[]
+  sessions             Session[]
+  evaluations          Evaluation[]
+  diagnoses            Diagnosis[]
+  documents            Document[]
+  reports              Report[]
+  consents             Consent[]
+  auditLogs            AuditLog[]
+  reportTemplates      ReportTemplate[]
+  appointments         Appointment[]
+  notifications        Notification[]
+
+  documentIdentities   DocumentIdentity[]
+  communicationLogs    CommunicationLog[]
+  automationSettings   AutomationSetting[]
+  testResults          TestResult[]
+}
+
+model Patient {
+  id                String            @id @default(uuid())
+  psychologistId    String
+  psychologist      User              @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  
+  firstName         String
+  lastName          String
+  identityDoc       String?
+  birthDate         DateTime?
+  gender            String?
+  phone             String?
+  whatsapp          String?
+  email             String?
+  address           String?
+  emergencyContact  String?
+  photoUrl          String?
+  status            PatientStatus     @default(ACTIVE)
+  entryDate         DateTime          @default(now())
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  clinicalHistory   ClinicalHistory?
+  sessions          Session[]
+  evaluations       Evaluation[]
+  diagnoses         Diagnosis[]
+  documents         Document[]
+  reports           Report[]
+  consents          Consent[]
+  appointments      Appointment[]
+  auditLogs         AuditLog[]
+  communicationLogs CommunicationLog[]
+  testResults       TestResult[]
+
+  @@index([psychologistId])
+}
+
+model DocumentIdentity {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  identityType     String   @default("PERSONAL_NAME") // PERSONAL_NAME, CENTER_NAME, CUSTOM
+  name             String   // Identificador interno de la identidad (ej. "Consultorio Miraflores")
+  displayName      String   // Encabezado impreso en el PDF (ej. "Centro Psicológico Equilibrio" o "Psic. Carlos Mendoza")
+  professionalName String?
+  title            String?  // ej. "Psicólogo Clínico", "Lic. en Psicología"
+  colegiatura      String?  // ej. "CPhP 45892"
+  specialty        String?
+  centerName       String?
+  address          String?
+  phone            String?
+  email            String?
+  whatsapp         String?
+  website          String?
+  logoUrl          String?
+  signatureUrl     String?
+  stampUrl         String?
+  isDefault        Boolean  @default(false)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  reports          Report[]
+
+  @@index([userId])
+}
+
+model ClinicalHistory {
+  id                      String      @id @default(uuid())
+  patientId               String      @unique
+  patient                 Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  reasonForConsultation   String?
+  currentProblemHistory   String?
+  personalBackground      String?
+  familyBackground        String?
+  medicalBackground       String?
+  psychologicalBackground String?
+  educationalHistory      String?
+  workHistory             String?
+  socialHistory           String?
+  familyRelationships     String?
+  habits                  String?
+  riskFactors             String?
+  protectiveFactors       String?
+  clinicalObservations    String?
+  interventionPlan        String?
+
+  version                 Int         @default(1)
+  updatedByUserId         String?
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+}
+
+model Session {
+  id                 String          @id @default(uuid())
+  patientId          String
+  patient            Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId     String
+  psychologist       User            @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  appointmentId      String?         // Enlace a la cita correspondiente
+
+  sessionDate        DateTime
+  startTime          String?
+  endTime            String?
+  durationMinutes    Int             @default(50)
+  modality           SessionModality @default(PRESENCIAL)
+  status             SessionStatus   @default(COMPLETED)
+  sessionNumber      Int?
+
+  objective          String?
+  observations       String?
+  topicsAddressed    String?
+  observedBehaviors  String?
+  interventions      String?
+  techniquesUsed     String?
+  patientResponse    String?
+  evolution          String?
+  agreements         String?
+  assignedHomework   String?
+  nextSessionPlan    String?
+  privateNotes       String?         // Texto libre de notas clínicas
+  nextSessionDate    DateTime?
+  isDraft            Boolean         @default(false)
+  version            Int             @default(1)
+
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@index([patientId])
+  @@index([psychologistId])
+}
+
+model Evaluation {
+  id                     String      @id @default(uuid())
+  patientId              String
+  patient                Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId         String
+  psychologist           User        @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+
+  evaluationName         String
+  instrumentName         String
+  version                String?
+  evaluationDate         DateTime    @default(now())
+  evaluatorName          String?
+  reason                 String?
+  
+  scoresJson             String?     // Stored as JSON string
+  percentilesJson        String?     // Stored as JSON string
+  scalesJson             String?     // Stored as JSON string
+  qualitativeObservations String?
+  clinicalInterpretation String?
+
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+
+  @@index([patientId])
+}
+
+model Diagnosis {
+  id             String            @id @default(uuid())
+  patientId      String
+  patient        Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId String
+  psychologist   User              @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+
+  system         DiagnosisSystem   @default(CIE_11)
+  code           String
+  name           String
+  description    String?
+  status         DiagnosisStatus   @default(HYPOTHESIS)
+  isPrimary      Boolean           @default(false)
+  clinicalNotes  String?
+
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  history        DiagnosisHistory[]
+
+  @@index([patientId])
+}
+
+model DiagnosisHistory {
+  id             String          @id @default(uuid())
+  diagnosisId    String
+  diagnosis      Diagnosis       @relation(fields: [diagnosisId], references: [id], onDelete: Cascade)
+  previousStatus DiagnosisStatus
+  newStatus      DiagnosisStatus
+  changedByUserId String
+  reason         String?
+  createdAt      DateTime        @default(now())
+}
+
+model Document {
+  id             String           @id @default(uuid())
+  patientId      String
+  patient        Patient          @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId String
+  psychologist   User             @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+
+  fileName       String
+  fileType       String
+  fileSize       Int
+  fileUrl        String
+  category       DocumentCategory @default(OTHER)
+  description    String?
+  version        Int              @default(1)
+
+  ocrResult      OcrResult?
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([patientId])
+}
+
+model OcrResult {
+  id                String       @id @default(uuid())
+  documentId        String       @unique
+  document          Document     @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  rawExtractedText  String
+  editedText        String?
+  extractedFields   String?      // Stored as JSON string
+  confidenceScore   Float        @default(0.0)
+  processedAt       DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+}
+
+model Report {
+  id                  String            @id @default(uuid())
+  patientId           String
+  patient             Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId      String
+  psychologist        User              @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  documentIdentityId  String?
+  documentIdentity    DocumentIdentity? @relation(fields: [documentIdentityId], references: [id], onDelete: SetNull)
+
+  reportNumber        String
+  title               String
+  reportType          ReportType        @default(CLINICAL_SUMMARY)
+  contentHtml         String
+  identitySnapshotJson String?          // Snapshot exactode la identidad documental en el momento de emisión
+  status              ReportStatus      @default(DRAFT)
+  approvedAt          DateTime?
+  approvedByUserId    String?
+  version             Int               @default(1)
+  pdfUrl              String?
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([patientId])
+}
+
+model ReportTemplate {
+  id             String   @id @default(uuid())
+  psychologistId String
+  psychologist   User     @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+
+  name           String
+  description    String?
+  structureJson  String   // JSON string of template fields
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Consent {
+  id               String    @id @default(uuid())
+  patientId        String
+  patient          Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId   String
+  psychologist     User      @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+
+  title            String
+  consentType      String
+  contentText      String
+  version          String    @default("1.0")
+  status           String    @default("PENDING") // PENDING, SIGNED, REVOKED
+  signedAt         DateTime?
+  signatureDataUrl String?
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([patientId])
+}
+
+model Appointment {
+  id               String        @id @default(uuid())
+  patientId        String
+  patient          Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId   String
+  psychologist     User          @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+
+  title            String
+  startDateTime    DateTime
+  endDateTime      DateTime
+  modality         SessionModality @default(PRESENCIAL)
+  status           SessionStatus   @default(SCHEDULED)
+  notes            String?       // SOLO NOTAS ADMINISTRATIVAS - NUNCA CLINICAS
+  reminderSent     Boolean       @default(false)
+
+  // Sincronización Google Calendar
+  googleEventId    String?
+  googleCalendarId String?
+  googleSyncStatus String        @default("PENDIENTE") // SINCRONIZADO, PENDIENTE, ERROR
+  googleSyncError  String?
+  lastGoogleSyncAt DateTime?
+
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([psychologistId])
+}
+
+model CommunicationLog {
+  id               String    @id @default(uuid())
+  psychologistId   String
+  psychologist     User      @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  patientId        String?
+  patient          Patient?  @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  appointmentId    String?
+
+  channel          String    // EMAIL, WHATSAPP
+  messageType      String    // REMINDER_24H, CONFIRMATION, CANCELLATION, RESCHEDULE, NEW_BOOKING
+  templateName     String?
+  recipient        String    // Correo o Número de WhatsApp
+  status           String    @default("ENVIADO") // ENVIADO, ENTREGADO, LEIDO, CONFIRMADO, PENDIENTE, ERROR
+  resultMessage    String?
+  sentAt           DateTime  @default(now())
+
+  @@index([psychologistId])
+}
+
+model AutomationSetting {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  emailNewBooking      Boolean  @default(true)
+  emailConfirmation    Boolean  @default(true)
+  emailCancellation    Boolean  @default(true)
+  emailReschedule      Boolean  @default(true)
+  emailReminder        Boolean  @default(true)
+  whatsappReminder24h  Boolean  @default(true)
+  whatsappConfirmation Boolean  @default(true)
+  googleCalendarSync   Boolean  @default(true)
+
+  reminderTemplate24h  String?  @default("Hola {{nombre_paciente}}, te recordamos tu cita con {{nombre_profesional}} el {{fecha}} a las {{hora}} (Modalidad: {{modalidad}}). Por favor confirma tu asistencia.")
+  templatesJson        String?
+
+  updatedAt            DateTime @updatedAt
+}
+
+model TestLibrary {
+  id             String   @id @default(uuid())
+  name           String
+  author         String?
+  year           String?
+  population     String?
+  ageRange       String?
+  area           String?  // Depresión, Ansiedad, Personalidad, Neuropsicología
+  itemCount      Int?
+  duration       String?
+  responseType   String?
+  scoringSystem  String?
+  baremosJson    String?  // JSON string con normas y baremos autorizados
+  manualUrl      String?  // URL al manual PDF oficial
+  createdAt      DateTime @default(now())
+
+  testResults    TestResult[]
+}
+
+model TestResult {
+  id                  String       @id @default(uuid())
+  patientId           String
+  patient             Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologistId      String
+  psychologist        User         @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  testLibraryId       String?
+  testLibrary         TestLibrary? @relation(fields: [testLibraryId], references: [id], onDelete: SetNull)
+
+  instrumentName      String
+  rawScoresJson       String?      // JSON de puntajes directos
+  percentilesJson     String?      // JSON de percentiles calculados según baremos autorizados
+  aiAnalysisJson      String?      // Análisis borrador de IA
+  approvedContentJson String?      // Contenido revisado y APROBADO por el psicólogo
+  approvalStatus      String       @default("BORRADOR") // BORRADOR, APROBADO
+  approvedByUserId    String?
+  approvedAt          DateTime?
+  version             Int          @default(1)
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@index([patientId])
+}
+
+model ClinicalDocumentIndex {
+  id             String   @id @default(uuid())
+  title          String   // CIE-11 OMS Manual Oficial, DSM-5-TR Manual Diagnóstico, etc.
+  system         String   // CIE_11, DSM_5_TR, CLINICAL_GUIDE
+  author         String?
+  rawContent     String   // Texto extraído indexado para búsqueda semántica e IA
+  indexedAt      DateTime @default(now())
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetPatientId String?
+  targetPatient  Patient? @relation(fields: [targetPatientId], references: [id], onDelete: SetNull)
+
+  action         String   // LOGIN, LOGOUT, VIEW_RECORD, CREATE_PATIENT, etc.
+  resource       String
+  ipAddress      String?
+  userAgent      String?
+  details        String?  // JSON string
+  result         String   @default("SUCCESS")
+  timestamp      DateTime @default(now())
+
+  @@index([userId])
+  @@index([timestamp])
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title      String
+  message    String
+  type       String   @default("INFO") // INFO, APPOINTMENT, REPORT, SYSTEM
+  isRead     Boolean  @default(false)
+  link       String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+model SystemSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}

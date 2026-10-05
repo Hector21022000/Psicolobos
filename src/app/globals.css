@@ -1,0 +1,164 @@
+/**
+ * Nombre del archivo: src/app/globals.css
+ * Descripción: Estilos globales, paleta de colores clínicos, animaciones y utilidades de la plataforma Psicolobos.
+ * Fecha de última modificación: 2026-09-18
+ * Autor: Psicolobos Development Team
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 230 20% 96%;
+    --foreground: 224 35% 15%;
+  }
+
+  body {
+    background-color: #f3f4f8;
+    color: #2b2f3e;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Efectos de interfaz clínica PsicoCMS */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.clinical-card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.clinical-card:hover {
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px rgba(72, 68, 150, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Badges de estado de citas según las capturas */
+.badge-presencial {
+  background-color: #fef7ed;
+  color: #b46914;
+  border: 1px solid #fed7aa;
+}
+
+.badge-online {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.badge-realizada {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.badge-noasistio {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.badge-pendiente {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+/* Estilos de Aislamiento de Impresión y Descarga a PDF de Ficha de Anamnesis */
+@media print {
+  /* Ocultar absolutamente TODO en la página */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Mostrar ÚNICAMENTE el contenedor del documento activo y todos sus descendientes */
+  #anamnesis-printable-document,
+  #anamnesis-printable-document *,
+  #session-guide-printable,
+  #session-guide-printable * {
+    visibility: visible !important;
+  }
+
+  /* Ocultar elementos marcados explícitamente dentro del documento (botones de acción, etc.) */
+  #anamnesis-printable-document .print\:hidden,
+  #anamnesis-printable-document .print\:hidden *,
+  #session-guide-printable .print\:hidden,
+  #session-guide-printable .print\:hidden * {
+    visibility: hidden !important;
+    display: none !important;
+  }
+
+  /* Posicionar el documento al inicio de la hoja imprimible */
+  #anamnesis-printable-document,
+  #session-guide-printable {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+
+  /* Formatear campos de texto para que parezcan líneas limpias en documento físico */
+  input[type="text"], textarea, select {
+    border: none !important;
+    border-bottom: 1px solid #0f172a !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 2px 4px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+  }
+
+  input[type="checkbox"] {
+    accent-color: #0f172a !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm 12mm 15mm;
+  }
+}
+
