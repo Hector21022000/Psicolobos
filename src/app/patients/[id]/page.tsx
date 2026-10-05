@@ -1239,6 +1239,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                       name: item.name,
                       system: item.system,
                       status: 'CONFIRMED',
+                      isPrimary: false,
                       clinicalNotes: item.description,
                     });
                     setIsAddDiagnosisOpen(true);
