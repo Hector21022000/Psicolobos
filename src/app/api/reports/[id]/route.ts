@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAuthSession } from '@/lib/auth';
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthSession();
     if (!user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const reportId = params.id;
+    const resolvedParams = await params;
+    const reportId = resolvedParams.id;
 
     // Verificar si el reporte existe
     const existingReport = await prisma.report.findUnique({
