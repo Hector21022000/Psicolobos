@@ -22,6 +22,7 @@ export interface AuthUser {
   lastName: string;
   colegiatura?: string | null;
   specialty?: string | null;
+  avatarUrl?: string | null;
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -69,6 +70,7 @@ export async function getAuthSession(): Promise<AuthUser | null> {
         lastName: true,
         colegiatura: true,
         specialty: true,
+        avatarUrl: true,
         isActive: true,
       },
     });
@@ -83,6 +85,7 @@ export async function getAuthSession(): Promise<AuthUser | null> {
       lastName: dbUser.lastName,
       colegiatura: dbUser.colegiatura,
       specialty: dbUser.specialty,
+      avatarUrl: dbUser.avatarUrl,
     };
   } catch {
     return null;

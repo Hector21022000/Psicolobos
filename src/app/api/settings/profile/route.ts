@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
         specialty: true,
         phone: true,
         address: true,
+        avatarUrl: true,
       }
     });
 
@@ -59,6 +60,7 @@ export async function PUT(req: NextRequest) {
       specialty: data.specialty,
       phone: data.phone,
       address: data.address,
+      avatarUrl: data.avatarUrl,
     };
 
     if (data.password && data.password.trim() !== '') {
@@ -76,6 +78,7 @@ export async function PUT(req: NextRequest) {
         specialty: true,
         phone: true,
         address: true,
+        avatarUrl: true,
       }
     });
 

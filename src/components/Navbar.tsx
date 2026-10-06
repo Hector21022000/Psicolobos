@@ -159,7 +159,11 @@ export default function Navbar({ onOpenAiCopilot, title = 'Panel de Gesti√≥n Cl√
             {currentUser?.role === 'SUPER_ADMIN' ? 'Super Admin' : currentUser ? `Psc. ${currentUser.firstName}` : 'Cargando...'}
           </span>
           <div className="relative w-8 h-8 rounded-full bg-psicoPurple-600 text-white flex items-center justify-center overflow-hidden border-2 border-slate-100 shadow-xs cursor-pointer hover:scale-105 transition-transform" title="Editar Perfil">
-            <User className="w-5 h-5 text-white" />
+            {currentUser?.avatarUrl ? (
+              <img src={currentUser.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <User className="w-5 h-5 text-white" />
+            )}
           </div>
         </Link>
       </div>

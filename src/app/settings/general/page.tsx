@@ -12,7 +12,8 @@ export default function SettingsGeneralPage() {
     colegiatura: '',
     specialty: '',
     phone: '',
-    address: ''
+    address: '',
+    avatarUrl: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -32,7 +33,8 @@ export default function SettingsGeneralPage() {
             colegiatura: data.colegiatura || '',
             specialty: data.specialty || '',
             phone: data.phone || '',
-            address: data.address || ''
+            address: data.address || '',
+            avatarUrl: data.avatarUrl || ''
           });
         }
       } catch (error) {
@@ -46,6 +48,21 @@ export default function SettingsGeneralPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert('La imagen es muy grande. El tamaño máximo es 2MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, avatarUrl: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,6 +129,29 @@ export default function SettingsGeneralPage() {
               {message.text}
             </div>
           )}
+
+          <div className="flex items-center gap-6 mb-6 pb-6 border-b border-slate-100">
+            <div className="relative w-24 h-24 rounded-full bg-slate-100 border-4 border-white shadow-md flex items-center justify-center overflow-hidden shrink-0">
+              {formData.avatarUrl ? (
+                <img src={formData.avatarUrl} alt="Foto de perfil" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-10 h-10 text-slate-300" />
+              )}
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-800 mb-1">Foto de Perfil</h3>
+              <p className="text-xs text-slate-500 mb-3">Sube una foto tuya para mostrar en el menú y a los pacientes (Máx. 2MB).</p>
+              <label className="cursor-pointer bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors shadow-sm">
+                <span>Subir Foto</span>
+                <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+              </label>
+              {formData.avatarUrl && (
+                <button type="button" onClick={() => setFormData({ ...formData, avatarUrl: '' })} className="ml-3 text-xs font-medium text-rose-500 hover:text-rose-600">
+                  Quitar foto
+                </button>
+              )}
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1.5">
