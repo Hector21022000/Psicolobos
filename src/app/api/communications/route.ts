@@ -21,7 +21,8 @@ export async function GET(req: NextRequest) {
     const channel = searchParams.get('channel');
     const limit = parseInt(searchParams.get('limit') || '50', 10);
 
-    const whereClause: any = user.role === 'SUPER_ADMIN' ? {} : { psychologistId: user.id };
+    // Aislamiento ESTRICTO: Cada usuario ve SOLO sus registros
+    const whereClause: any = { psychologistId: user.id };
     if (channel) {
       whereClause.channel = channel;
     }

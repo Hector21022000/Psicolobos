@@ -24,10 +24,8 @@ export async function GET(req: NextRequest) {
 
     const whereCondition: any = {};
 
-    // Aislamiento por psicólogo salvo que sea SUPER_ADMIN
-    if (user.role !== 'SUPER_ADMIN') {
-      whereCondition.psychologistId = user.id;
-    }
+    // Aislamiento ESTRICTO por psicólogo (incluso el SUPER_ADMIN sólo ve sus propios pacientes)
+    whereCondition.psychologistId = user.id;
 
     if (status) {
       whereCondition.status = status;
@@ -57,22 +55,7 @@ export async function GET(req: NextRequest) {
       orderBy: { [sortBy]: 'desc' },
     });
 
-    // Fallback si la búsqueda por psychologistId específico no retorna pacientes
-    if (patients.length === 0 && !search && !status) {
-      patients = await prisma.patient.findMany({
-        include: {
-          sessions: {
-            orderBy: { sessionDate: 'desc' },
-            take: 1,
-          },
-          diagnoses: {
-            where: { isPrimary: true },
-            take: 1,
-          },
-        },
-        orderBy: { [sortBy]: 'desc' },
-      });
-    }
+
 
     return NextResponse.json({ patients });
   } catch (error) {

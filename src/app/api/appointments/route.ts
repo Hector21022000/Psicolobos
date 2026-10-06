@@ -20,7 +20,8 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const patientId = searchParams.get('patientId');
 
-    const whereClause: any = user.role === 'SUPER_ADMIN' ? {} : { psychologistId: user.id };
+    // Aislamiento ESTRICTO: Cada usuario ve SOLO su agenda
+    const whereClause: any = { psychologistId: user.id };
     if (patientId) {
       whereClause.patientId = patientId;
     }

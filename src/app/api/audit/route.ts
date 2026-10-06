@@ -20,7 +20,8 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const action = searchParams.get('action');
 
-    const whereClause: any = user.role === 'SUPER_ADMIN' ? {} : { userId: user.id };
+    // Aislamiento ESTRICTO: Cada usuario ve SOLO sus registros de auditoría
+    const whereClause: any = { userId: user.id };
     if (action) {
       whereClause.action = action;
     }

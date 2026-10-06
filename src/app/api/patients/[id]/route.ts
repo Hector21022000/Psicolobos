@@ -45,13 +45,8 @@ export async function GET(
       return NextResponse.json({ error: 'Paciente no encontrado' }, { status: 404 });
     }
 
-    // Permitir acceso al profesional autenticado reasignando automáticamente si es necesario
     if (patient.psychologistId !== user.id) {
-      await prisma.patient.update({
-        where: { id },
-        data: { psychologistId: user.id },
-      });
-      patient.psychologistId = user.id;
+      return NextResponse.json({ error: 'Acceso denegado. Este paciente pertenece a otro profesional.' }, { status: 403 });
     }
 
     // Registrar en auditoría la visualización de datos sensibles
@@ -89,8 +84,9 @@ export async function PUT(
       return NextResponse.json({ error: 'Paciente no encontrado' }, { status: 404 });
     }
 
-    if (user.role !== 'SUPER_ADMIN' && existingPatient.psychologistId !== user.id) {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+    // Aislamiento ESTRICTO: Nadie, ni siquiera el Super Admin, puede editar pacientes de otros profesionales
+    if (existingPatient.psychologistId !== user.id) {
+      return NextResponse.json({ error: 'Acceso denegado. Este paciente pertenece a otro profesional.' }, { status: 403 });
     }
 
     const updatedPatient = await prisma.patient.update({
@@ -141,8 +137,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Paciente no encontrado' }, { status: 404 });
     }
 
-    if (user.role !== 'SUPER_ADMIN' && existingPatient.psychologistId !== user.id) {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+    // Aislamiento ESTRICTO: Nadie, ni siquiera el Super Admin, puede eliminar pacientes de otros profesionales
+    if (existingPatient.psychologistId !== user.id) {
+      return NextResponse.json({ error: 'Acceso denegado. Este paciente pertenece a otro profesional.' }, { status: 403 });
     }
 
     // Regla de borrado seguro: Archivar en lugar de destruir inmediatamente

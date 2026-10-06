@@ -25,7 +25,8 @@ export async function GET(req: NextRequest) {
       orderBy: { name: 'asc' },
     });
 
-    const whereClause: any = user.role === 'SUPER_ADMIN' ? {} : { psychologistId: user.id };
+    // Aislamiento ESTRICTO: Cada usuario ve SOLO sus registros
+    const whereClause: any = { psychologistId: user.id };
     if (patientId) {
       whereClause.patientId = patientId;
     }
