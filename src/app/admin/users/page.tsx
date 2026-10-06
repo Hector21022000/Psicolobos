@@ -82,10 +82,10 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col items-start gap-1">
-                      <span className={\`px-2.5 py-0.5 rounded-full text-[10px] font-bold \${u.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}\`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${u.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                         {u.isActive ? 'ACTIVO' : 'INACTIVO'}
                       </span>
-                      <span className={\`px-2.5 py-0.5 rounded-full text-[10px] font-bold \${u.role === 'SUPER_ADMIN' ? 'bg-rose-100 text-rose-700 border border-rose-200' : 'bg-blue-50 text-blue-600 border border-blue-100'}\`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'SUPER_ADMIN' ? 'bg-rose-100 text-rose-700 border border-rose-200' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
                         {u.role}
                       </span>
                     </div>
