@@ -45,10 +45,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleQuickDemo = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('Demo1234!');
-  };
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -112,27 +108,8 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Accesos Rápidos para Demo */}
-          <div className="pt-4 border-t border-slate-700 space-y-2 text-center">
-            <span className="text-[11px] text-slate-400 block font-medium">Credenciales Demo Rápidas:</span>
-            <div className="flex gap-2 justify-center">
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('psicologo@demo.local')}
-                className="px-3 py-1.5 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-[11px] text-sage-300 border border-slate-600 flex items-center gap-1.5"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 text-sage-400" />
-                <span>Psicólogo Demo</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('admin@demo.local')}
-                className="px-3 py-1.5 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-[11px] text-blue-300 border border-slate-600 flex items-center gap-1.5"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                <span>Super Admin</span>
-              </button>
-            </div>
+          <div className="pt-4 space-y-2 text-center">
+            {/* Oculto: Credenciales de superadministrador protegidas */}
           </div>
         </div>
 

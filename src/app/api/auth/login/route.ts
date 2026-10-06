@@ -25,21 +25,31 @@ export async function POST(req: NextRequest) {
       where: { email: email.toLowerCase().trim() },
     });
 
-    // Si el usuario no existe en la BD demo, crearlo automáticamente
+    const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
+    const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
+
+    // Configuración inicial de Super Admin mediante Variables de Entorno Seguras
+    if (superAdminEmail && superAdminPassword && email === superAdminEmail && password === superAdminPassword) {
+      if (!user) {
+        const passwordHash = await hashPassword(superAdminPassword);
+        user = await prisma.user.create({
+          data: {
+            email: superAdminEmail,
+            passwordHash: passwordHash,
+            role: 'SUPER_ADMIN',
+            firstName: 'Super',
+            lastName: 'Admin',
+            isActive: true,
+          },
+        });
+      }
+    }
+
     if (!user) {
-      const defaultHash = await hashPassword(password);
-      user = await prisma.user.create({
-        data: {
-          email: email.toLowerCase().trim(),
-          passwordHash: defaultHash,
-          role: 'PSYCHOLOGIST',
-          firstName: 'Psc. Víctor',
-          lastName: 'Robles',
-          colegiatura: 'CPhP 14892',
-          specialty: 'Psicología Clínica',
-          isActive: true,
-        },
-      });
+      return NextResponse.json(
+        { error: 'Credenciales inválidas.' },
+        { status: 401 }
+      );
     }
 
     if (!user.isActive) {
@@ -49,15 +59,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verificar contraseña o permitir acceso flexible en entorno demo
+    // Verificar contraseña real
     const isMatch = await verifyPassword(password, user.passwordHash);
     if (!isMatch) {
-      // Actualizar el hash para adaptar la nueva contraseña ingresada por el usuario
-      const newHash = await hashPassword(password);
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { passwordHash: newHash },
-      });
+      return NextResponse.json(
+        { error: 'Credenciales inválidas.' },
+        { status: 401 }
+      );
     }
 
     const token = await signToken({
