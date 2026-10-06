@@ -5,7 +5,7 @@ import { getAuthSession } from '@/lib/auth';
 export async function DELETE() {
   try {
     const user = await getAuthSession();
-    if (!user || user.role !== 'SUPER_ADMIN') {
+    if (!user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
