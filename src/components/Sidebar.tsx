@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -39,6 +39,18 @@ export default function Sidebar({ onOpenAiCopilot }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.authenticated && data.user) {
+          setUserId(data.user.id);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -159,7 +171,7 @@ export default function Sidebar({ onOpenAiCopilot }: SidebarProps) {
         {/* Footer del Sidebar con botón Ver tu web */}
         <div className="p-3 border-t border-slate-100 space-y-2 bg-slate-50/50">
           <Link
-            href="/booking"
+            href={userId ? `/booking/${userId}` : "#"}
             target="_blank"
             className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-medium shadow-sm hover:border-psicoPurple-300 hover:text-psicoPurple-700 transition-all"
           >

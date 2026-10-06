@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import {
   Home as HomeIcon,
   Video,
@@ -18,16 +18,19 @@ import {
 
 export default function BookingPage() {
   const router = useRouter();
+  const params = useParams();
+  const professionalId = params.professionalId as string;
   const [modality, setModality] = useState<'presencial' | 'online'>('online');
   const [selectedDay, setSelectedDay] = useState<number | null>(16);
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    fetch('/api/public/profile')
+    if (!professionalId) return;
+    fetch(`/api/public/profile?id=${professionalId}`)
       .then((res) => res.json())
       .then((data) => setProfile(data))
       .catch(console.error);
-  }, []);
+  }, [professionalId]);
 
   const p = profile?.webProfile || {};
 

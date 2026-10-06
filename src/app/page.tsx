@@ -225,7 +225,7 @@ export default function DashboardPage() {
                   Disponibilidad semanal
                 </h2>
                 <button
-                  onClick={() => router.push('/booking')}
+                  onClick={() => router.push('/settings/portal')}
                   className="p-1 rounded text-slate-400 hover:text-psicoPurple-600"
                   title="Editar horarios"
                 >

@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const user = await prisma.user.findFirst({
-      where: { isActive: true },
-      orderBy: { createdAt: 'desc' },
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'Falta ID del profesional' }, { status: 400 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id },
       select: { 
         firstName: true,
         lastName: true,
