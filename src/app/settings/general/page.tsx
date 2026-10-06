@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Save, User, Lock, Mail, Phone, MapPin, Award, Briefcase, Database, Download, Trash2 } from 'lucide-react';
+import { Save, User, Lock, Mail, Phone, MapPin, Award, Briefcase, Database, Download, Trash2, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function SettingsGeneralPage() {
   const [formData, setFormData] = useState({
@@ -114,8 +115,13 @@ export default function SettingsGeneralPage() {
   if (loading) return <div className="p-6 text-slate-500">Cargando datos...</div>;
 
   return (
-    <div className="p-6 max-w-4xl">
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Configuración General</h1>
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="flex items-center gap-4 mb-6">
+        <Link href="/patients" className="p-2 bg-white rounded-full border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-sm">
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <h1 className="text-2xl font-bold text-slate-800">Configuración General</h1>
+      </div>
       
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-6 border-b border-slate-100">

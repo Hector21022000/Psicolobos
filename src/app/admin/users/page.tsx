@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Mail, Phone, Calendar, User, Activity } from 'lucide-react';
+import { ShieldCheck, Mail, Phone, Calendar, User, Activity, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -28,7 +29,10 @@ export default function AdminUsersPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex items-center gap-4">
+        <Link href="/patients" className="p-2 bg-white rounded-full border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-sm">
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
         <div>
           <h1 className="text-2xl font-extrabold text-slate-800 flex items-center gap-2">
             <ShieldCheck className="w-7 h-7 text-rose-500" />
