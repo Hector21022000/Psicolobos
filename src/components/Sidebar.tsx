@@ -131,27 +131,7 @@ export default function Sidebar({ onOpenAiCopilot }: SidebarProps) {
           })}
 
           {/* Submenús con Desplegable */}
-          <div className="pt-2">
-            <button
-              onClick={() => toggleSubmenu('blog')}
-              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100"
-            >
-              <div className="flex items-center gap-3">
-                <FileText className="w-4 h-4 text-slate-500" />
-                <span>Blog</span>
-              </div>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openSubmenu === 'blog' ? 'rotate-180' : ''}`} />
-            </button>
-            {openSubmenu === 'blog' && (
-              <div className="pl-10 pr-3 py-1 space-y-1">
-                <Link href="/blog/articles" className="block py-1.5 text-xs text-slate-500 hover:text-psicoPurple-600">Artículos</Link>
-                <Link href="/blog/categories" className="block py-1.5 text-xs text-slate-500 hover:text-psicoPurple-600">Categorías</Link>
-              </div>
-            )}
-
-
-
-            <button
+          <div className="pt-2">            <button
               onClick={() => toggleSubmenu('config')}
               className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100"
             >

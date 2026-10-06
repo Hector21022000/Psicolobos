@@ -14,8 +14,10 @@ import {
   CheckCircle,
   ExternalLink,
   Brain,
-  Pencil
+  Pencil,
+  ArrowLeft
 } from 'lucide-react';
+import Link from 'next/link';
 
 const EditableText = ({
   text,
@@ -131,9 +133,14 @@ export default function PortalSettingsWYSIWYG() {
   return (
     <div className="flex flex-col h-full bg-slate-100">
       <div className="bg-white p-4 border-b border-slate-200 shadow-sm sticky top-0 z-40 flex justify-between items-center">
-        <div>
-          <h2 className="font-bold text-lg text-slate-800">Editor Visual de la Página Web</h2>
-          <p className="text-xs text-slate-500">Haz clic en los textos con el icono del lápiz para cambiarlos en tiempo real.</p>
+        <div className="flex items-center gap-4">
+          <Link href="/patients" className="p-2 bg-slate-100 rounded-full border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition-colors shadow-sm">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div>
+            <h2 className="font-bold text-lg text-slate-800">Editor Visual de la Página Web</h2>
+            <p className="text-xs text-slate-500">Haz clic en los textos con el icono del lápiz para cambiarlos en tiempo real.</p>
+          </div>
         </div>
         <div className="px-4 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200 flex items-center gap-2">
           <CheckCircle className="w-4 h-4" /> Los cambios se guardan automáticamente
