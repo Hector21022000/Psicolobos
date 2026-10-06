@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Save, User, Lock, Mail, Phone, MapPin, Award, Briefcase } from 'lucide-react';
+import { Save, User, Lock, Mail, Phone, MapPin, Award, Briefcase, Database, Download, Trash2 } from 'lucide-react';
 
 export default function SettingsGeneralPage() {
   const [formData, setFormData] = useState({
@@ -72,6 +72,26 @@ export default function SettingsGeneralPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleClearData = async () => {
+    if (!window.confirm('¿ESTÁS SEGURO? Esta acción borrará TODOS los pacientes, historiales e informes. No se puede deshacer.')) return;
+    
+    try {
+      const res = await fetch('/api/settings/clear-test-data', { method: 'DELETE' });
+      if (res.ok) {
+        alert('Datos eliminados correctamente. El sistema está limpio.');
+        window.location.reload();
+      } else {
+        alert('Error al eliminar los datos.');
+      }
+    } catch (e) {
+      alert('Error de red al intentar eliminar los datos.');
+    }
+  };
+
+  const handleDownloadBackup = () => {
+    window.location.href = '/api/settings/backup';
   };
 
   if (loading) return <div className="p-6 text-slate-500">Cargando datos...</div>;
@@ -146,6 +166,45 @@ export default function SettingsGeneralPage() {
             </button>
           </div>
         </form>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-6">
+        <div className="p-6 border-b border-slate-100 bg-red-50/30">
+          <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+            <Database className="w-5 h-5 text-slate-600" />
+            Gestión de Datos y Respaldo
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">Descarga una copia de seguridad o limpia el sistema para empezar desde cero.</p>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 border border-slate-100 rounded-lg">
+            <div>
+              <h3 className="font-medium text-slate-800">Copia de Seguridad (Backup)</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Descarga todos los datos (Pacientes, Historias, Informes) en formato JSON a tu computadora.</p>
+            </div>
+            <button
+              onClick={handleDownloadBackup}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Descargar Respaldo
+            </button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 border border-red-100 bg-red-50/50 rounded-lg">
+            <div>
+              <h3 className="font-medium text-red-800">Borrar Datos de Prueba</h3>
+              <p className="text-xs text-red-600/80 mt-0.5">Elimina TODOS los pacientes y registros del sistema permanentemente. Usa con precaución.</p>
+            </div>
+            <button
+              onClick={handleClearData}
+              className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-medium hover:bg-rose-700 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Vaciar Sistema
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
