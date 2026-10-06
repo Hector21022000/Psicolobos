@@ -9,6 +9,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Search, Bell, Sparkles, HelpCircle, User } from 'lucide-react';
 
 interface PatientSearchResult {
@@ -137,10 +138,13 @@ export default function Navbar({ onOpenAiCopilot, title = 'Panel de Gestión Cl�
         </button>
 
         {/* Campana Notificaciones */}
-        <button className="relative w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors">
+        <button 
+          onClick={() => alert('Pronto podrás ver tus notificaciones aquí.')}
+          className="relative w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors"
+        >
           <Bell className="w-4 h-4" />
           <span className="absolute -top-0.5 -right-0.5 bg-rose-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
-            3
+            0
           </span>
         </button>
 
@@ -150,14 +154,14 @@ export default function Navbar({ onOpenAiCopilot, title = 'Panel de Gestión Cl�
         </button>
 
         {/* Avatar Usuario */}
-        <div className="flex items-center gap-2 pl-2">
+        <Link href="/settings/general" className="flex items-center gap-2 pl-2">
           <span className="text-xs font-semibold text-slate-700">
-            {currentUser ? `Psc. ${currentUser.firstName}` : 'Psc. Víctor'}
+            {currentUser?.role === 'SUPER_ADMIN' ? 'Super Admin' : currentUser ? `Psc. ${currentUser.firstName}` : 'Cargando...'}
           </span>
-          <div className="relative w-8 h-8 rounded-full bg-psicoPurple-600 text-white flex items-center justify-center overflow-hidden border-2 border-slate-100 shadow-xs">
+          <div className="relative w-8 h-8 rounded-full bg-psicoPurple-600 text-white flex items-center justify-center overflow-hidden border-2 border-slate-100 shadow-xs cursor-pointer hover:scale-105 transition-transform" title="Editar Perfil">
             <User className="w-5 h-5 text-white" />
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );

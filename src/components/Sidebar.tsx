@@ -40,6 +40,7 @@ export default function Sidebar({ onOpenAiCopilot }: SidebarProps) {
   const router = useRouter();
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -47,6 +48,7 @@ export default function Sidebar({ onOpenAiCopilot }: SidebarProps) {
       .then(data => {
         if (data.authenticated && data.user) {
           setUserId(data.user.id);
+          setUserRole(data.user.role);
         }
       })
       .catch(console.error);
@@ -166,6 +168,19 @@ export default function Sidebar({ onOpenAiCopilot }: SidebarProps) {
               </div>
             )}
           </div>
+          
+          {userRole === 'SUPER_ADMIN' && (
+            <div className="pt-4 pb-2">
+              <div className="px-3 pb-2 text-[10px] font-bold text-rose-500 uppercase tracking-wider flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5" /> 
+                Super Administración
+              </div>
+              <Link href="/admin/users" className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-rose-50 hover:text-rose-700 transition-all">
+                <Users className="w-4 h-4 text-rose-500" />
+                <span>Gestión de Profesionales</span>
+              </Link>
+            </div>
+          )}
         </nav>
 
         {/* Footer del Sidebar con botón Ver tu web */}
